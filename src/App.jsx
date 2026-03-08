@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Library from './Library';
+import Portal from './Portal';
+import FloatingPlayer from './FloatingPlayer';
 import AchievementSystem from './AchievementSystem';
 import WhatToEat from './WhatToEat';
-import Library from './Library';
-import { Trophy } from 'lucide-react';
-import { Library as BookshelfIcon } from 'lucide-react';
+import { Trophy, LayoutDashboard, Home } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, 
@@ -79,7 +80,7 @@ const getLunarBirthdayInCregorian = (lunarMonth, lunarDay) => {
 };
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState('home'); 
+  const [activeTab, setActiveTab] = useState('portal'); // Changed default to portal
   const [user, setUser] = useState(null);
   
   // 纪念册状态
@@ -315,10 +316,11 @@ const App = () => {
           { id: 'home', icon: Heart, label: '纪念册', color: 'bg-rose-500', text: 'text-rose-400' },
           { id: 'whisper', icon: Mail, label: '悄悄话', color: 'bg-pink-400', text: 'text-pink-300' },
           { id: 'study', icon: BookOpen, label: '自习室', color: 'bg-indigo-600', text: 'text-indigo-400' },
-          { id: 'media', icon: Tv, label: '放映厅', color: 'bg-slate-800', text: 'text-slate-500' },
+          { id: 'media', icon: MonitorPlay, label: '放映厅', color: 'bg-slate-800', text: 'text-slate-500' },
           { id: 'achievements', icon: Trophy, label: '成就墙', color: 'bg-amber-500', text: 'text-amber-400' },
           { id: 'food', icon: Utensils, label: '今天吃啥', color: 'bg-orange-500', text: 'text-orange-400' },
-          { id: 'library', icon: BookshelfIcon, label: '在线书库', color: 'bg-emerald-600', text: 'text-emerald-500' }
+          { id: 'library', icon: BookOpen, label: '在线书库', color: 'bg-emerald-600', text: 'text-emerald-500' },
+          { id: 'portal', icon: LayoutDashboard, label: '导航页', color: 'bg-indigo-600', text: 'text-indigo-400' }
         ].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-6 py-3 rounded-2xl transition-all ${activeTab === tab.id ? `${tab.color} text-white shadow-lg scale-105` : `hover:bg-white/50 ${tab.text}`}`}>
             <tab.icon size={20} fill={activeTab === tab.id ? "currentColor" : "none"} />
@@ -487,29 +489,44 @@ const App = () => {
           </div>
         </div>
       )}
-      {/* --- Food Tab --- */}
+      {/* --- Food Tab --- */}
       {activeTab === 'food' && (
         <div className="animate-in slide-in-from-right-12 duration-700">
           <WhatToEat />
         </div>
       )}
       {activeTab === 'library' && (<Library />)}
+      {activeTab === 'portal' && <Portal onTabChange={setActiveTab} />}
+
+      <FloatingPlayer activeTab={activeTab} />
 
       {/* --- Achievements Tab --- */}
       {activeTab === 'achievements' && (
         <AchievementSystem user={user} db={db} appId={appId} />
       )}
 
-      {/* --- Media Tab --- */}
+      {/* --- Media Tab (Reverted to Internal Iframe) --- */}
       {activeTab === 'media' && (
         <div className="animate-in fade-in duration-700 h-screen w-full flex flex-col pt-4">
            <div className="px-6 py-4 flex flex-wrap gap-4 items-center border-b border-slate-800 bg-slate-900/50 backdrop-blur">
               <div className="flex items-center gap-3 mr-4"><MonitorPlay className="text-indigo-400" size={24} /><span className="text-white font-black text-lg tracking-tight">放映厅</span></div>
               <div className="flex gap-2">{videoSources.map(source => (<button key={source.name} onClick={() => setCurrentVideoUrl(source.url)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${currentVideoUrl === source.url ? `${source.color} text-white shadow-lg` : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>{source.name}</button>))}</div>
-              <div className="flex-1 max-w-md ml-auto relative group"><Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={14} /><input type="text" value={currentVideoUrl} onChange={(e) => setCurrentVideoUrl(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 text-slate-300 pl-10 pr-4 py-2 rounded-full text-xs focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none" placeholder="输入自定义视频链接..." /></div>
+              <div className="flex-1 max-w-md ml-auto relative group flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={14} />
+                  <input type="text" value={currentVideoUrl} onChange={(e) => setCurrentVideoUrl(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 text-slate-300 pl-10 pr-4 py-2 rounded-full text-xs focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none" placeholder="输入自定义视频链接..." />
+                </div>
+                <button onClick={() => window.open(currentVideoUrl, '_blank')} className="p-2.5 bg-slate-800 text-slate-400 rounded-full hover:bg-slate-700 hover:text-white transition-all shadow-lg" title="外部浏览器打开">
+                  <ExternalLink size={16} />
+                </button>
+              </div>
            </div>
            <div className="flex-1 bg-black relative">
              <iframe src={currentVideoUrl} className="w-full h-full border-none" allowFullScreen title="video-player" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" />
+             {/* Fallback Overlay for potential block */}
+             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 hover:opacity-100 transition-opacity bg-black/40">
+                <p className="text-white/50 text-xs font-bold">如果加载异常，请点击右上角图标外部打开</p>
+             </div>
            </div>
         </div>
       )}

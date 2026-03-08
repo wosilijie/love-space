@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, 
@@ -103,6 +103,17 @@ export default function AchievementSystem({ user, db, appId }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   
+
+  const [showProgress, setShowProgress] = useState(false);
+  const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      setShowProgress(entry.isIntersecting);
+    }, { threshold: 0.1 });
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [activeTab]);
 
   useEffect(() => {
     if (!user) return;
@@ -297,12 +308,12 @@ export default function AchievementSystem({ user, db, appId }) {
           )}
         </div>
 
-        {/* 核心改动：全局占位层，强制将内容顶离屏幕底部 */}
-        <div className="h-64 md:h-72 w-full pointer-events-none" aria-hidden="true" />
+        {/* 全局占位层，强制将内容顶离屏幕底部 */}
+        <div ref={sentinelRef} className="h-64 md:h-72 w-full pointer-events-none" aria-hidden="true" />
       </main>
 
       {/* 悬浮进度条 - 样式优化 */}
-      <footer className="fixed bottom-32 left-0 right-0 pointer-events-none z-[999] flex items-center justify-center">
+      <footer className={`fixed bottom-32 left-0 right-0 pointer-events-none z-[999] flex items-center justify-center transition-all duration-700 ${showProgress ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="max-w-3xl w-full px-10 pointer-events-auto">
           <div className="bg-slate-900/95 backdrop-blur-3xl rounded-full px-10 py-7 shadow-[0_35px_80px_-20px_rgba(0,0,0,0.5)] flex items-center gap-10 border border-white/10 ring-1 ring-white/5 transition-transform hover:scale-[1.01]">
             

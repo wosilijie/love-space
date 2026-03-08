@@ -477,7 +477,7 @@ const Library = () => {
                 </button>
 
                 {expandedGroups[groupName] && (
-                  <div className="divide-y divide-slate-50">
+                  <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar">
                     {groupBooks.map(book => (
                       <div key={book.id} className="flex items-center gap-4 px-8 py-5 hover:bg-slate-50 transition-all group">
                         <div className="w-10 h-12 bg-gradient-to-b from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center shrink-0 shadow-sm">
