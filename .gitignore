@@ -1,4 +1,6 @@
+################################
 # Logs
+################################
 logs
 *.log
 npm-debug.log*
@@ -7,18 +9,76 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+################################
+# Dependencies
+################################
+node_modules/
+
+################################
+# Build output
+################################
 dist
 dist-ssr
+build
+out
+coverage
+
+################################
+# Environment variables (IMPORTANT - SECURITY)
+################################
+.env
+.env.*
+!.env.example
+
+################################
+# Local config
+################################
 *.local
 
+################################
+# Cache / temp files
+################################
+.cache
+.vite
+.vite-cache
+.eslintcache
+
+################################
+# Firebase (future safety)
+################################
+.firebase/
+firebase-debug.log
+.firebaserc.local
+
+################################
 # Editor directories and files
+################################
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+################################
+# OS generated files
+################################
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+################################
+# Runtime files
+################################
+pids
+*.pid
+*.seed
+*.pid.lock
+
+################################
+# Temporary files
+################################
+*.tmp
+*.temp
